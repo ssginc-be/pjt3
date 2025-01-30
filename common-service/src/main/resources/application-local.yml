@@ -8,3 +8,8 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create
+
+elasticsearch:
+  host: localhost:9200
+  username: elastic
+  password: Abcd123!

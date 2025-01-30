@@ -34,6 +34,11 @@ dependencies {
     //  Spring Data JPA
     //***************************************************************
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    //***************************************************************
+    //  Elasticsearch
+    //***************************************************************
+    implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
 }
 
 dependencyManagement {

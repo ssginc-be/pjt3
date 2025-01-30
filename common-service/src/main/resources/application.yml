@@ -1,9 +1,39 @@
 server:
   port: 9092
+  servlet:
+    encoding:
+      charset: UTF-8 # 서블릿의 request, response 인코딩을 UTF-8로 설정
+      enabled: true
+      force: true
 
 spring:
   application:
     name: common-service
+
+  profiles:
+    include: local
+
+  sql:
+    init:
+      mode: always
+      continue-on-error: true
+
+  jpa:
+    # show_sql: true # System.out 방식 (이거 말고 logging.level.org.hibernate.SQL 설정을 권장)
+    properties:
+      hibernate:
+        format_sql: true
+        highlight_sql: true
+        use_sql_comments: true
+      dialect: org.hibernate.dialect.MySQL8InnoDBDialect
+
+  datasource:
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 10
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
 
 eureka:
   client:
@@ -11,3 +41,22 @@ eureka:
     register-with-eureka: true
     service-url:
       defaultZone: http://127.0.0.1:8761/eureka
+
+##### log setting
+logging:
+  level:
+    root: INFO
+    org.springframework: INFO
+    org.springframework.web: DEBUG
+    org.thymeleaf: INFO
+    org.springframework.boot.web.servlet: ERROR
+    org.hibernate.SQL: DEBUG
+
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+  # file log
+  file:
+    name: logs/reserve-service.log
+    path: logs

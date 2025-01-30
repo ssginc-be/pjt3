@@ -6,6 +6,8 @@ spring:
     name: service-discovery
 
 eureka:
+  server:
+    eviction-interval-timer-in-ms: 600000 # 10분 - client의 renewal-interval과 동일
   client:
     fetch-registry: false
     register-with-eureka: false

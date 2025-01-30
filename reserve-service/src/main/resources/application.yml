@@ -36,11 +36,15 @@ spring:
       max-lifetime: 1800000
 
 eureka:
+  instance:
+    lease-renewal-interval-in-seconds: 600 # 로그 때문에 10분으로 설정
+    lease-expiration-duration-in-seconds: 1200 # 로그 때문에 20분으로 설정
   client:
     fetch-registry: true
     register-with-eureka: true
     service-url:
       defaultZone: http://127.0.0.1:8761/eureka
+    registry-fetch-interval-seconds: 1800 # 로그 때문에 30분으로 설정
 
 ##### log setting
 logging:

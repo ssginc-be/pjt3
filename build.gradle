@@ -1,0 +1,55 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.4.2'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+bootJar.enabled = false // 빌드시 루트 모듈(pjt3)은 bootJar 사용x
+
+subprojects { // 모든 하위 모듈들에 이 설정을 적용
+    group 'com.ssginc'
+    version '1.0.0-beta.1'
+    sourceCompatibility = '17'
+
+    apply plugin: 'java'
+    apply plugin: 'org.springframework.boot'
+    apply plugin: 'io.spring.dependency-management'
+
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(17)
+        }
+    }
+
+    bootJar.enabled = true // 서브 모듈은 bootJar만 사용
+    jar.enabled = false
+
+    configurations {
+        compileOnly {
+            extendsFrom annotationProcessor
+        }
+    }
+
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        //************************************************************************
+        //  Lombok
+        //************************************************************************
+        // vo(dto) 자동 생성 기능 + log를 위한 Log4J, Slf4j를 사용할 수 있게 함.
+        implementation 'org.projectlombok:lombok:1.18.30'
+        annotationProcessor 'org.projectlombok:lombok:1.18.30'
+
+
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+        testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    }
+
+    tasks.named('test') {
+        useJUnitPlatform()
+    }
+
+    tasks.register("prepareKotlinBuildScriptModel"){}
+}

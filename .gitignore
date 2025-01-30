@@ -35,3 +35,10 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### Log ###
+*.log
+
+### Confidential YAML ###
+application-local.yml
+application-production.yml

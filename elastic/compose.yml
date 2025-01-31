@@ -1,0 +1,84 @@
+networks:
+  elk:
+    driver: bridge/
+
+services:
+  # Elasticsearch 설정
+  elasticsearch:
+    build:
+      context: .
+      dockerfile: elasticsearch.Dockerfile
+      args:
+        VERSION: ${STACK_VERSION}
+    container_name: elasticsearch
+    #image: elasticsearch:${STACK_VERSION}
+    ports:
+      - 9200:9200
+      - 9300:9300
+    volumes: 
+      - ./elasticsearch:/usr/share/elasticsearch/data
+    environment: 
+      discovery.type: single-node
+      node.name: elasticsearch
+      ES_JAVA_OPTS: -Xms512m -Xmx512m
+      ingest.geoip.downloader.enabled: false
+      xpack.security.enabled: false
+      xpack.security.http.ssl.enabled: false
+      xpack.security.transport.ssl.enabled: false
+      xpack.license.self_generated.type: ${LICENSE}
+      ELASTIC_USERNAME: ${ELASTIC_USERNAME}
+      ELASTIC_PASSWORD: ${ELASTIC_PASSWORD}
+    networks:
+      - elk
+
+  # Logstash 설정
+  logstash:
+    container_name: logstash
+    image: logstash:${STACK_VERSION}
+    ports:
+      - 5044:5044
+      - 5000:5000
+      - 9600:9600
+    volumes:
+      - ./logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+    environment:
+      LS_JAVA_OPTS: -Xms256m -Xmx256m
+      LOGSTASH_INTERNAL_PASSWORD: ${LOGSTASH_PASSWORD}
+    depends_on: 
+      - elasticsearch
+    networks:
+      - elk
+
+  # Kibana 설정
+  kibana:
+    container_name: kibana
+    image: kibana:${STACK_VERSION}
+    ports: 
+      - 5601:5601
+    depends_on:
+      - elasticsearch
+    volumes:
+      - ./kibana.yml:/usr/share/kibana/config/kibana.yml
+    environment:
+      KIBANA_INTERNAL_PASSWORD: ${KIBANA_PASSWORD}
+    networks:
+      - elk
+
+  # Filebeat 설정
+  filebeat:
+    entrypoint: "filebeat -e -strict.perms=false"
+    build:
+      context: .
+      dockerfile: filebeat.Dockerfile
+      args:
+        VERSION: ${STACK_VERSION}
+    container_name: filebeat
+    depends_on:
+      - logstash
+    volumes:
+      - ./filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - ../logs:/usr/share/filebeat/logs
+    environment:
+      FILEBEAT_INTERNAL_PASSWORD: ${FILEBEAT_PASSWORD}
+    networks:
+      - elk

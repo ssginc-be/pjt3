@@ -38,7 +38,11 @@ out/
 
 ### Log ###
 *.log
+logs/*
 
 ### Confidential YAML ###
-application-local.yml
-application-production.yml
+**/application-local.yml
+**/application-production.yml
+
+### Elasticsearch cache files ###
+/elastic/elasticsearch/*

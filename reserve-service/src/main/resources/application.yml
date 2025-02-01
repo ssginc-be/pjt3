@@ -59,8 +59,14 @@ logging:
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
     file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    dateformat: "yyyy-MM-dd HH:mm:ss,Asia/Seoul" # ms는 제외함
 
   # file log
   file:
     name: logs/reserve-service.log
     path: logs
+
+  logback:
+    rollingpolicy:
+      file-name-pattern: "reserve-service.%d{yyyy-MM-dd}.%i.log"
+      max-history: 90 # 3달

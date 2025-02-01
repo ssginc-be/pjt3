@@ -47,7 +47,9 @@ subprojects { // 모든 하위 모듈들에 이 설정을 적용
         //************************************************************************
         implementation 'net.logstash.logback:logstash-logback-encoder:8.0'
 
-
+        //************************************************************************
+        //  Spring Boot Test
+        //************************************************************************
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
         testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     }

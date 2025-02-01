@@ -39,6 +39,20 @@ dependencies {
     //  Elasticsearch
     //***************************************************************
     implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
+
+    //************************************************************************
+    //  Spring Security
+    //************************************************************************
+    // password 암호화
+    // Spring Security의 Crypto 모듈
+    implementation 'org.springframework.security:spring-security-crypto:6.0.0'
+
+    //***************************************************************
+    //  SMTP
+    //***************************************************************
+    // 비밀번호 찾기에 사용함.
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+
 }
 
 dependencyManagement {

@@ -53,6 +53,10 @@ dependencies {
     // 비밀번호 찾기에 사용함.
     implementation 'org.springframework.boot:spring-boot-starter-mail'
 
+    //***************************************************************
+    //  AWS S3
+    //***************************************************************
+    implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
 }
 
 dependencyManagement {

@@ -46,3 +46,8 @@ logs/*
 
 ### Elasticsearch cache files ###
 /elastic/elasticsearch/*
+
+### Lambda Node.js files ###
+lambda-image-resize/node_modules/*
+!lambda-image-resize/node_modules/@img
+!lambda-image-resize/node_modules/sharp

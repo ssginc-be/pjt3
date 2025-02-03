@@ -1,0 +1,66 @@
+ext {
+    set('springCloudVersion', "2024.0.0")
+}
+
+dependencies {
+    //***************************************************************
+    //  Spring Cloud - Eureka Client
+    //***************************************************************
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+
+    //************************************************************************
+    //  Spring Boot core
+    //************************************************************************
+    // spring-boot-starter는
+    // implementation 'org.springframework.boot:spring-boot-starter-logging'를 포함함.
+    // slf4j의 구현체인 log-back을 사용함.
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+    //***************************************************************
+    //  Thymeleaf
+    //***************************************************************
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect:3.2.0'
+
+    //***************************************************************
+    //  MySQL Driver
+    //***************************************************************
+    implementation 'mysql:mysql-connector-java:8.0.33'
+
+    //***************************************************************
+    //  Spring Data JPA
+    //***************************************************************
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    //***************************************************************
+    //  Elasticsearch
+    //***************************************************************
+    implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
+
+    //************************************************************************
+    //  Spring Security
+    //************************************************************************
+    // password 암호화
+    // Spring Security의 Crypto 모듈
+    implementation 'org.springframework.security:spring-security-crypto:6.0.0'
+
+    //***************************************************************
+    //  SMTP
+    //***************************************************************
+    // 비밀번호 찾기에 사용함.
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+
+    //***************************************************************
+    //  AWS S3
+    //***************************************************************
+    implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
+}

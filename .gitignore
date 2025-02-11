@@ -51,3 +51,6 @@ logs/*
 lambda-image-resize/node_modules/*
 !lambda-image-resize/node_modules/@img
 !lambda-image-resize/node_modules/sharp
+
+### Gradle configuration file ###
+gradle.properties

@@ -1,5 +1,5 @@
 server:
-  port: 9092
+  port: 9093
   servlet:
     encoding:
       charset: UTF-8 # 서블릿의 request, response 인코딩을 UTF-8로 설정

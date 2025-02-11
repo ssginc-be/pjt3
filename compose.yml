@@ -1,0 +1,64 @@
+# EC2 내부에서 실행되는 스크립트
+# 루트 경로에 .env 파일 있어야 함 (Actions로 하든지 수동으로 하든지..)
+networks:
+  pjt3:
+    driver: bridge
+
+services:
+  # Service Discovery 설정
+  service-discovery:
+    container_name: service-discovery
+    image: qriosity/pjt3_service-discovery:latest
+    ports:
+      - 8761:8761
+    networks:
+      - pjt3
+
+  # API Gateway 설정
+  api-gateway:
+    container_name: api-gateway
+    image: qriosity/pjt3_api-gateway:latest
+    ports:
+      - 9000:9000
+    environment:
+      eureka.client.serviceUrl.defaultZone: http://service-discovery:8761/eureka
+    depends_on: 
+      - service-discovery
+    networks:
+      - pjt3
+
+  # Reserve Service 설정
+  reserve-service:
+    container_name: reserve-service
+    image: qriosity/pjt3_reserve-service:latest
+    ports: 
+      - 9091:9091
+    depends_on:
+      - service-discovery
+    environment:
+      spring.profiles.include: production
+      spring.datasource.url: jdbc:mysql://pjt3-rds.cf8iaoeka72f.ap-northeast-2.rds.amazonaws.com:3306/pjt3?&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+      spring.jpa.hibernate.ddlAuto: update
+      eureka.client.serviceUrl.defaultZone: http://service-discovery:8761/eureka
+    networks:
+      - pjt3
+
+  # Common Service 설정
+  common-service:
+    container_name: common-service
+    image: qriosity/pjt3_common-service:latest
+    ports: 
+      - 9093:9093
+    depends_on:
+      - service-discovery
+    environment:
+      spring.profiles.include: production
+      spring.datasource.url: jdbc:mysql://pjt3-rds.cf8iaoeka72f.ap-northeast-2.rds.amazonaws.com:3306/pjt3?&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+      spring.jpa.hibernate.ddlAuto: update
+      spring.mail.username: ${MAIL_USERNAME}
+      spring.mail.password: ${MAIL_PASSWORD}
+      cloud.aws.credentials.accessKey: ${S3_ACCESS_KEY}
+      cloud.aws.credentials.secretKey: ${S3_SECRET_KEY}
+      eureka.client.serviceUrl.defaultZone: http://service-discovery:8761/eureka
+    networks:
+      - pjt3

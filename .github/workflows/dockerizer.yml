@@ -1,0 +1,139 @@
+name: Dockerizer
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-modules:
+    name: Build Gradle Modules
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
+
+    - name: Grant execute permission to gradlew
+      run: chmod +x gradlew
+
+    - name: Check gradle wrapper JDK version
+      run: ./gradlew --version
+
+    - name: (1/4) Build API Gateway
+      run: ./gradlew clean :api-gateway:build -x test
+
+    - name: (2/4) Build Service Discovery
+      run: ./gradlew :service-discovery:build -x test
+
+    - name: (3/4) Build Reserve Service
+      run: ./gradlew :reserve-service:build -x test
+
+    - name: (4/4) Build Common Service
+      run: ./gradlew :common-service:build -x test
+
+    - name: Upload Build Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: module-artifacts
+        path: |
+          api-gateway/build/libs/*.jar
+          service-discovery/build/libs/*.jar
+          reserve-service/build/libs/*.jar
+          common-service/build/libs/*.jar
+        retention-days: 1
+
+  docker-push:
+    name: Build & Push Docker images
+    runs-on: ubuntu-latest
+    needs: build-modules
+    env:
+      DOCKER_REPO: qriosity/pjt3
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Get Build Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: module-artifacts
+        # no 'path' -> unpack to individual build/libs folders
+
+    - name: Docker Hub Sign-in
+      run: docker login -u qriosity -p ${{ secrets.DOCKER_PASSWORD }}
+      
+    - name: Build Docker Images
+      run: |
+        docker build -t ${DOCKER_REPO}_api-gateway:latest -f api-gateway.Dockerfile .
+        docker build -t ${DOCKER_REPO}_service-discovery:latest -f service-discovery.Dockerfile .
+        docker build -t ${DOCKER_REPO}_reserve-service:latest -f reserve-service.Dockerfile .
+        docker build -t ${DOCKER_REPO}_common-service:latest -f common-service.Dockerfile .
+      
+    - name: Publish Docker Images
+      run: |
+        docker push ${DOCKER_REPO}_api-gateway
+        docker push ${DOCKER_REPO}_service-discovery
+        docker push ${DOCKER_REPO}_reserve-service
+        docker push ${DOCKER_REPO}_common-service
+
+  publish-gcr:
+    name: Publish to GHCR
+    runs-on: ubuntu-latest
+    needs: docker-push
+    env:
+      DOCKER_REPO: qriosity/pjt3
+      GHCR_REPO: ssginc-be/pjt3
+    steps:
+    - name: Get Docker Images
+      run: |
+        docker pull ${DOCKER_REPO}_api-gateway:latest
+        docker pull ${DOCKER_REPO}_service-discovery:latest
+        docker pull ${DOCKER_REPO}_reserve-service:latest
+        docker pull ${DOCKER_REPO}_common-service:latest
+
+    - name: GHCR Sign-in
+      run: docker login ghcr.io -u Queue-ri -p ${{ secrets.GCR_PAT }}
+
+    - name: Retag Images to GHCR format
+      run: |
+        docker tag ${DOCKER_REPO}_api-gateway:latest ghcr.io/${GHCR_REPO}_api-gateway:latest
+        docker tag ${DOCKER_REPO}_service-discovery:latest ghcr.io/${GHCR_REPO}_service-discovery:latest
+        docker tag ${DOCKER_REPO}_reserve-service:latest ghcr.io/${GHCR_REPO}_reserve-service:latest
+        docker tag ${DOCKER_REPO}_common-service:latest ghcr.io/${GHCR_REPO}_common-service:latest
+
+    - name: Publish to GHCR
+      run: |
+        docker push ghcr.io/${GHCR_REPO}_api-gateway:latest
+        docker push ghcr.io/${GHCR_REPO}_service-discovery:latest
+        docker push ghcr.io/${GHCR_REPO}_reserve-service:latest
+        docker push ghcr.io/${GHCR_REPO}_common-service:latest
+
+  deploy-ec2:
+    name: Deploy Containers to EC2
+    runs-on: ubuntu-latest
+    needs: docker-push
+    steps:
+    - name: Setup SSH connection to EC2
+      run: |
+        touch pjt3-ec2.pem
+        echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" >> pjt3-ec2.pem
+        chmod 600 pjt3-ec2.pem
+        eval $(ssh-agent -s)
+        ssh-add pjt3-ec2.pem
+        mkdir ~/.ssh
+        touch ~/.ssh/known_hosts
+        ssh-keyscan -H "${{ secrets.EC2_URL }}" >> ~/.ssh/known_hosts
+
+    - name: Get Deployer Script
+      run: wget https://raw.githubusercontent.com/ssginc-be/pjt3/main/.github/deployer.sh
+    
+    - name: Run Deployer
+      run: ssh -i pjt3-ec2.pem ubuntu@${{ secrets.EC2_URL }} -T sh < deployer.sh # prevent pseudo terminal
+
+    - name: Remove Deployer Script
+      run: rm deployer.sh

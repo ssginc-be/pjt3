@@ -1,6 +1,13 @@
 package com.ssginc.commonservice.chat.dto;
 
-public class ChatDto {
+import groovy.transform.builder.Builder;
+import lombok.Value;
 
+@Value
+@Builder
+public class ChatDto {
+    long messageId;
+    String message;
+    String loginId;
 
 }

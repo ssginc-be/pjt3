@@ -1,6 +1,6 @@
 package com.ssginc.commonservice.chat.controller;
 
-import com.ssginc.commonservice.chat.service.ChatServiceImpl;
+import com.ssginc.commonservice.chat.service.ChatService;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import com.ssginc.commonservice.chat.entity.Message;
@@ -17,7 +17,7 @@ import java.util.Date;
 @RequiredArgsConstructor
 public class ChatController {
 
-    private ChatServiceImpl chatService;
+    private ChatService chatService;
 
     //=============================== 채팅 ===============================
 

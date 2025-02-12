@@ -3,7 +3,7 @@ package com.ssginc.commonservice.chat.controller;
 import com.ssginc.commonservice.chat.service.ChatService;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
-import com.ssginc.commonservice.chat.entity.Message;
+import com.ssginc.commonservice.chat.entity.ChatMessage;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
@@ -30,7 +30,7 @@ public class ChatController {
     //채팅 구현
     @MessageMapping("/chatting")
     @SendTo("/topic/chatting")
-    public Message sendMessage2(@RequestBody Message message) {
+    public ChatMessage sendMessage2(@RequestBody ChatMessage message) {
         System.out.println("messageVO >>> " + message);
         Date date = new Date();
         message.setTime(date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds());
